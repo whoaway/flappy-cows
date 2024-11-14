@@ -6,25 +6,25 @@ var overlapPenalty_seconds = 10;
 
 export class Scene extends Phaser.Scene {
     public sprites: {
-        bg?: Phaser.GameObjects.TileSprite;
-        plane?: Phaser.Physics.Arcade.Sprite;
-        cow1?: Phaser.GameObjects.Sprite;
-        cow2?: Phaser.GameObjects.Sprite;
-        coin?: Phaser.GameObjects.Sprite;
-        coin1?: Phaser.Physics.Arcade.Sprite;
-        avatar?: Phaser.GameObjects.Sprite;
-        timerbg?: Phaser.GameObjects.Sprite;
-        timerbar?: Phaser.GameObjects.Sprite;
-        timerclock?: Phaser.GameObjects.Sprite;
-        cloud1?: Phaser.GameObjects.Sprite;
-        cloud2?: Phaser.GameObjects.Sprite;
-        cloud3?: Phaser.GameObjects.Sprite;
-        bird1?: Phaser.GameObjects.Sprite;
+        bg?: Phaser.GameObjects.TileSprite; 
+        plane?: Phaser.Physics.Arcade.Sprite; // the plane that the player controls
+        cow1?: Phaser.GameObjects.Sprite; // left cow plane passanger
+        cow2?: Phaser.GameObjects.Sprite; // right cow plane passanger
+        coin_icon?: Phaser.GameObjects.Sprite; // the coin displayed by the score text
+        coin?: Phaser.Physics.Arcade.Sprite; // the coin that the player needs to collect
+        avatar?: Phaser.GameObjects.Sprite; // the avatar displayed on the top right
+        timerbg?: Phaser.GameObjects.Sprite; // the timer background
+        timerbar?: Phaser.GameObjects.Sprite; // the timer bar
+        timerclock?: Phaser.GameObjects.Sprite; // the clock on left side of timer bar
+        cloud1?: Phaser.GameObjects.Sprite; // the cloud player needs to avoid
+        cloud2?: Phaser.GameObjects.Sprite; // the cloud player needs to avoid
+        cloud3?: Phaser.GameObjects.Sprite; // the cloud player needs to avoid
+        bird1?: Phaser.GameObjects.Sprite; // the bird player needs to avoid
         start_button?: Phaser.GameObjects.Sprite;
     } = {};
     public text: {
         score?: Phaser.GameObjects.Text;
-        timer?: Phaser.GameObjects.Text;
+        timer?: Phaser.GameObjects.Text; 
     } = {};
     public images: {
         timerbarmask?: Phaser.GameObjects.Image;
@@ -99,11 +99,11 @@ export class Scene extends Phaser.Scene {
         this.sprites.cloud3.setScale(0.5);
 
         // add coin
-        this.sprites.coin1 = this.physics.add.sprite(this.currentWidth + Phaser.Math.Between(100, this.currentWidth), Phaser.Math.Between(100, this.currentHeight - 100), "coin");
-        this.sprites.coin1.setScale(0.5);
+        this.sprites.coin = this.physics.add.sprite(this.currentWidth + Phaser.Math.Between(100, this.currentWidth), Phaser.Math.Between(100, this.currentHeight - 100), "coin");
+        this.sprites.coin.setScale(0.5);
         //prevents coin from falling
-        (this.sprites.coin1.body as Phaser.Physics.Arcade.Body).allowGravity = false;
-        (this.sprites.coin1.body as Phaser.Physics.Arcade.Body).mass = 0;
+        (this.sprites.coin.body as Phaser.Physics.Arcade.Body).allowGravity = false;
+        (this.sprites.coin.body as Phaser.Physics.Arcade.Body).mass = 0;
 
         // add bird
         const birdPosX = this.currentWidth + Phaser.Math.Between(100, this.currentWidth);
@@ -112,7 +112,7 @@ export class Scene extends Phaser.Scene {
         this.sprites.bird1.setScale(0.5);
 
         // enable physics for plane and coin
-        this.physics.world.enable([this.sprites.plane, this.sprites.coin1]);
+        this.physics.world.enable([this.sprites.plane, this.sprites.coin]);
 
         // add avatar
         const avatarPosX = this.currentWidth - 70;
@@ -120,11 +120,11 @@ export class Scene extends Phaser.Scene {
         this.sprites.avatar = this.add.sprite(avatarPosX, avatarPosY, "avatar");
         this.sprites.avatar.setScale(0.33);
 
-        // add coin
+        // add score coin
         const coinPosX = this.currentWidth - 160;
         const coinPosY = 66;
-        this.sprites.coin = this.add.sprite(coinPosX, coinPosY, "coin");
-        this.sprites.coin.setScale(0.32);
+        this.sprites.coin_icon = this.add.sprite(coinPosX, coinPosY, "coin");
+        this.sprites.coin_icon.setScale(0.32);
 
         // add score text
         const scorePosX = this.currentWidth - 200;
@@ -208,8 +208,8 @@ export class Scene extends Phaser.Scene {
         this.sprites.cloud2.setPosition(this.sprites.cloud2.x - objectSpeed, this.sprites.cloud2.y);
         this.sprites.cloud3.setPosition(this.sprites.cloud3.x - objectSpeed, this.sprites.cloud3.y);
         // move coin closer to plane
-        if (!this.sprites.coin1) return;
-        this.sprites.coin1.setPosition(this.sprites.coin1.x - objectSpeed, this.sprites.coin1.y);
+        if (!this.sprites.coin) return;
+        this.sprites.coin.setPosition(this.sprites.coin.x - objectSpeed, this.sprites.coin.y);
         // move bird closer to plane
         if (!this.sprites.bird1) return;
         this.sprites.bird1.setPosition(this.sprites.bird1.x - objectSpeed, this.sprites.bird1.y);
@@ -236,10 +236,10 @@ export class Scene extends Phaser.Scene {
             this.sprites.cloud3.setPosition(offsetX, offsetY);
         }
         // reset coin when out of bounds
-        if (this.sprites.coin1.x < -100) {
+        if (this.sprites.coin.x < -100) {
             const offsetX = this.currentWidth + Phaser.Math.Between(100, this.currentWidth);
             const offsetY = Phaser.Math.Between(100, this.currentHeight - 100);
-            this.sprites.coin1.setPosition(offsetX, offsetY);
+            this.sprites.coin.setPosition(offsetX, offsetY);
         }
         // reset bird when out of bounds
         if (this.sprites.bird1.x < -100) {
@@ -249,7 +249,7 @@ export class Scene extends Phaser.Scene {
         }
 
         // get coin when plane is close to coin
-        if (Phaser.Math.Distance.BetweenPoints(this.sprites.plane, this.sprites.coin1) < 100) {
+        if (Phaser.Math.Distance.BetweenPoints(this.sprites.plane, this.sprites.coin) < 100) {
             this.getCoin();
         }
         // shake game when plane is close to cloud
@@ -269,7 +269,7 @@ export class Scene extends Phaser.Scene {
 
         this.score = 0;
         this.isrunning = true;
-        this.physics.world.enable([this.sprites.plane!, this.sprites.coin1!]);
+        this.physics.world.enable([this.sprites.plane!, this.sprites.coin!]);
 
         // hide start button
         if (!this.sprites.start_button) return;
@@ -281,10 +281,10 @@ export class Scene extends Phaser.Scene {
         this.sprites.plane.setPosition(this.currentWidth / 5, this.currentHeight / 2);
 
         // set coin position
-        if (!this.sprites.coin1) return;
+        if (!this.sprites.coin) return;
         const coinX = this.currentWidth + Phaser.Math.Between(100, this.currentWidth);
         const coinY = Phaser.Math.Between(100, this.currentHeight - 100);
-        this.sprites.coin1.setPosition(coinX, coinY);
+        this.sprites.coin.setPosition(coinX, coinY);
 
         // set timerbar position
         if (!this.sprites.timerbar) return;
@@ -320,8 +320,8 @@ export class Scene extends Phaser.Scene {
 
     stopTheGame() {
         this.isrunning = false;
-        if (!this.sprites.plane || !this.sprites.coin1) return;
-        this.physics.world.disable([this.sprites.plane, this.sprites.coin1]);
+        if (!this.sprites.plane || !this.sprites.coin) return;
+        this.physics.world.disable([this.sprites.plane, this.sprites.coin]);
         // show start button
         if (!this.sprites.start_button) return;
         this.sprites.start_button.setAlpha(1);
@@ -349,10 +349,10 @@ export class Scene extends Phaser.Scene {
 
     getCoin() {
         this.score += 10;
-        if (!this.sprites.coin1) return;
+        if (!this.sprites.coin) return;
         const coinX = this.currentWidth + Phaser.Math.Between(100, this.currentWidth);
         const coinY = Phaser.Math.Between(100, this.currentHeight - 100);
-        this.sprites.coin1.setPosition(coinX, coinY);
+        this.sprites.coin.setPosition(coinX, coinY);
 
 }
 
